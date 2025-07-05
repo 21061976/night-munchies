@@ -1,586 +1,629 @@
-import React, { useState } from 'react';
-import { Clock, Users, Zap, ChefHat, Star, Timer, Flame, CheckCircle } from 'lucide-react';
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>לוח ארוחות הלילה שלנו</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .lucide-icon {
+            width: 1em;
+            height: 1em;
+            display: inline-block;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
 
-const meals = [
-  {
-    id: 1,
-    name: "טוסט גבינה מושלם",
-    emoji: "🧈",
-    time: "5 דק'",
-    difficulty: "קל מאוד",
-    calories: "400",
-    servings: 1,
-    ingredients: ["2 פרוסות לחם טוסט", "גבינה צהובה", "עגבניה", "מיונז"],
-    steps: [
-      "הכנס 2 פרוסות לחם לטוסטר",
-      "בזמן הטוסט - חתוך עגבניה לפרוסות",
-      "שים גבינה על הטוסט החם",
-      "הוסף פרוסות עגבניה ומיונז",
-      "חתוך באלכסון ותהנה!"
-    ],
-    tips: "הגבינה תמס יותר טוב אם הטוסט חם",
-    popularity: 95
-  },
-  {
-    id: 2,
-    name: "סקרמבל עם תוספות",
-    emoji: "🍳",
-    time: "7 דק'",
-    difficulty: "קל",
-    calories: "500",
-    servings: 1,
-    ingredients: ["3 ביצים", "גבינה צהובה מגוררת", "בצל ירוק קצוץ", "מעט שמן", "לחם"],
-    steps: [
-      "שבור 3 ביצים לקערה וערבב",
-      "חמם מעט שמן במחבת",
-      "שפוך ביצים ובלבל ברציפות",
-      "כשהביצים כמעט מוכנות - הוסף גבינה",
-      "פזר בצל ירוק והגש עם לחם"
-    ],
-    tips: "ביצים מקושקשות צריכות להיות קרמיות, לא יבשות",
-    popularity: 88
-  },
-  {
-    id: 3,
-    name: "פסטה מהירה",
-    emoji: "🍝",
-    time: "12 דק'",
-    difficulty: "בינוני",
-    calories: "600",
-    servings: 1,
-    ingredients: ["100 גרם פסטה", "רטב עגבניות", "נקניקיות", "גבינה מגוררת", "מלח"],
-    steps: [
-      "הרתח מים במקרמה עם מלח",
-      "הוסף פסטה ובשל לפי ההוראות",
-      "בינתיים - חתוך נקניקיות וחמם ברטב",
-      "סנן פסטה ושמור מעט מי בישול",
-      "ערבב פסטה + רטב + גבינה מגוררת"
-    ],
-    tips: "תמיד שמור קצת ממי הבישול - זה עוזר לערבב",
-    popularity: 92
-  },
-  {
-    id: 4,
-    name: "סלט טונה עשיר",
-    emoji: "🥗",
-    time: "5 דק'",
-    difficulty: "קל מאוד",
-    calories: "450",
-    servings: 1,
-    ingredients: ["פחית טונה", "ביצה קשה", "עגבניות", "מלפפון", "מיונז", "פיתה"],
-    steps: [
-      "פתח פחית טונה וסנן",
-      "חתוך ביצה קשה, עגבניות ומלפפון",
-      "ערבב הכל בקערה עם מיונז",
-      "חמם פיתה במיקרו 20 שניות",
-      "אכל עם הפיתה או מלא לתוכה"
-    ],
-    tips: "ביצים קשות אפשר להכין בתחילת השבוע",
-    popularity: 85
-  },
-  {
-    id: 5,
-    name: "קסדיה מהירה",
-    emoji: "🌯",
-    time: "6 דק'",
-    difficulty: "קל",
-    calories: "520",
-    servings: 1,
-    ingredients: ["2 פיתות", "גבינה צהובה", "הודו פרוס", "עגבניה", "מעט שמן"],
-    steps: [
-      "מרח מעט שמן על מחבת וחמם",
-      "שים פיתה אחת במחבת",
-      "פזר גבינה, הודו ועגבניה חתוכה",
-      "כסה בפיתה שניה",
-      "צלה 2-3 דקות מכל צד עד שזהב"
-    ],
-    tips: "לחץ קלות עם כף כדי שהגבינה תמס טוב",
-    popularity: 90
-  },
-  {
-    id: 6,
-    name: "תפוח אדמה ממולא",
-    emoji: "🥔",
-    time: "8 דק'",
-    difficulty: "קל",
-    calories: "400",
-    servings: 1,
-    ingredients: ["תפוח אדמה גדול", "גבינת קוטג'", "בצל ירוק", "גבינה צהובה", "מלח ופלפל"],
-    steps: [
-      "חורר את התפוח אדמה בכל הצדדים",
-      "מיקרו 6 דקות (הפוך באמצע)",
-      "חתוך לאורך והוצא את הבשר",
-      "ערבב בשר התפוח עם קוטג' ותיבול",
-      "מלא בחזרה ופזר גבינה צהובה מעל"
-    ],
-    tips: "תפוח אדמה מוכן כשהוא רך לחיצה",
-    popularity: 78
-  },
-  {
-    id: 7,
-    name: "סנדוויץ' בגט עשיר",
-    emoji: "🥖",
-    time: "4 דק'",
-    difficulty: "קל מאוד",
-    calories: "550",
-    servings: 1,
-    ingredients: ["בגט קטן", "הודו פרוס", "גבינה צהובה", "עגבניה", "חסה", "מיונז"],
-    steps: [
-      "חתוך בגט לאורך (אל תחתוך עד הסוף)",
-      "מרח מיונז בשני הצדדים",
-      "שכב הודו, גבינה, עגבניה וחסה",
-      "לחץ קלות ועטוף בנייר",
-      "אופציה: חמם בתנור דקה לגבינה מומסת"
-    ],
-    tips: "תמיד לחץ קלות כדי שהסנדוויץ' לא יתפרק",
-    popularity: 87
-  },
-  {
-    id: 8,
-    name: "אורז עם ביצה מטוגנת",
-    emoji: "🍚",
-    time: "8 דק'",
-    difficulty: "בינוני",
-    calories: "480",
-    servings: 1,
-    ingredients: ["כוס אורז מיידי", "ביצה", "נקניקיות", "בצל ירוק", "רטב סויה", "שמן"],
-    steps: [
-      "הכן אורז מיידי לפי ההוראות",
-      "חמם שמן במחבת וטגן ביצה",
-      "באותה מחבת טגן נקניקיות חתוכות",
-      "הגש אורז עם הביצה מעל",
-      "פזר בצל ירוק וטפטף רטב סויה"
-    ],
-    tips: "ביצה עם חלמון רך הכי טעימה עם האורז",
-    popularity: 83
-  },
-  {
-    id: 9,
-    name: "שקשוקה מהירה",
-    emoji: "🍅",
-    time: "10 דק'",
-    difficulty: "בינוני",
-    calories: "420",
-    servings: 1,
-    ingredients: ["רטב עגבניות", "2 ביצים", "בצל קטן", "פלפל אדום", "גבינת צפת", "לחם"],
-    steps: [
-      "חתוך בצל ופלפל לקוביות קטנות",
-      "מטגן במחבת 3 דקות",
-      "הוסף רטב עגבניות וחמם",
-      "שבור ביצים לתוך הרטב",
-      "בשל 5 דקות ופזר גבינת צפת מעל"
-    ],
-    tips: "אל תערבב את הביצים - תן להם להתבשל ברטב",
-    popularity: 89
-  },
-  {
-    id: 10,
-    name: "נאצ'וס ביתי",
-    emoji: "🧀",
-    time: "6 דק'",
-    difficulty: "קל",
-    calories: "480",
-    servings: 1,
-    ingredients: ["צ'יפס טורטילה", "גבינה צהובה מגוררת", "גואקמולה", "קטשופ", "בצל ירוק"],
-    steps: [
-      "פזר צ'יפס על צלחת שטוחה",
-      "פזר גבינה מגוררת מעל",
-      "מיקרו 90 שניות עד שהגבינה נמסה",
-      "הוסף גואקמולה וקטשופ",
-      "פזר בצל ירוק ותהנה!"
-    ],
-    tips: "אל תמלא יותר מדי - הצ'יפס צריך להישאר פריך",
-    popularity: 86
-  },
-  {
-    id: 11,
-    name: "רולו הודו וגבינה",
-    emoji: "🌮",
-    time: "5 דק'",
-    difficulty: "קל מאוד",
-    calories: "440",
-    servings: 1,
-    ingredients: ["טורטילה גדולה", "הודו פרוס", "גבינה צהובה", "חסה", "עגבניה", "מיונז"],
-    steps: [
-      "פרוש טורטילה על משטח עבודה",
-      "מרח מיונז על כל השטח",
-      "שכב הודו, גבינה, חסה ועגבניה",
-      "גלגל חזק מהקצה הקרוב אליך",
-      "חתוך לחצי וקבע עם קיסם"
-    ],
-    tips: "תמיד גלגל חזק בהתחלה כדי שלא יתפרק",
-    popularity: 82
-  },
-  {
-    id: 12,
-    name: "פנקייק מלוח מהיר",
-    emoji: "🥞",
-    time: "9 דק'",
-    difficulty: "בינוני",
-    calories: "460",
-    servings: 1,
-    ingredients: ["ביצה", "קמח", "חלב", "גבינה לבנה", "מלח", "בצל ירוק", "שמן"],
-    steps: [
-      "ערבב ביצה + 3 כפות קמח + מעט חלב",
-      "הוסף קמצוץ מלח ובצל ירוק קצוץ",
-      "חמם שמן במחבת קטנה",
-      "יצוק תערובת וטגן 3 דקות מכל צד",
-      "הגש עם גבינה לבנה"
-    ],
-    tips: "הפנקייק מוכן כשהוא זהוב ופריך מבחוץ",
-    popularity: 75
-  },
-  {
-    id: 13,
-    name: "סנדוויץ' גריל",
-    emoji: "🥪",
-    time: "7 דק'",
-    difficulty: "קל",
-    calories: "520",
-    servings: 1,
-    ingredients: ["2 פרוסות לחם", "גבינה צהובה", "הודו", "עגבניה", "חמאה"],
-    steps: [
-      "מרח חמאה על הצד החיצוני של הלחם",
-      "שכב גבינה, הודו ועגבניה בפנים",
-      "חמם מחבת וישים הסנדוויץ'",
-      "לחץ עם כף וטגן 3 דקות מכל צד",
-      "חתוך באלכסון והגש חם"
-    ],
-    tips: "החמאה בחוץ נותנת קריספיות מושלמת",
-    popularity: 91
-  },
-  {
-    id: 14,
-    name: "באו במקרמה",
-    emoji: "🍜",
-    time: "10 דק'",
-    difficulty: "בינוני",
-    calories: "380",
-    servings: 1,
-    ingredients: ["באו (נודלס רגיל)", "ביצה", "בצל ירוק", "גזר", "נקניקיות"],
-    steps: [
-      "הרתח מים במקרמה קטנה",
-      "הוסף את הבאו לפי ההוראות",
-      "2 דקות לפני הסוף - הוסף גזר חתוך",
-      "הוסף ביצה מקושקשת ונקניקיות",
-      "הגש חם עם בצל ירוק מעל"
-    ],
-    tips: "הביצה תתקשה מהחום - אל תבשל יותר מדי",
-    popularity: 80
-  },
-  {
-    id: 15,
-    name: "פיצה אישית מפיתה",
-    emoji: "🍕",
-    time: "8 דק'",
-    difficulty: "קל",
-    calories: "490",
-    servings: 1,
-    ingredients: ["פיתה", "רטב עגבניות", "גבינה מוצרלה", "זיתים", "פלפלים"],
-    steps: [
-      "מרח רטב עגבניות על הפיתה",
-      "פזר גבינה מוצרלה מגוררת",
-      "הוסף זיתים ופלפלים חתוכים",
-      "תנור טוסטר 200 מעלות - 5-6 דקות",
-      "הוצא כשהגבינה בועה וזהובה"
-    ],
-    tips: "תנור טוסטר עובד הכי טוב לפיצה אישית",
-    popularity: 93
-  },
-  {
-    id: 16,
-    name: "מקדוח הודו חם",
-    emoji: "🌯",
-    time: "6 דק'",
-    difficulty: "קל",
-    calories: "510",
-    servings: 1,
-    ingredients: ["לאפה או טורטילה", "הודו פרוס", "גבינה", "עגבניה", "חסה", "טחינה"],
-    steps: [
-      "חמם לאפה במיקרו 20 שניות",
-      "מרח טחינה על כל השטח",
-      "שכב הודו, גבינה, עגבניה וחסה",
-      "גלגל חזק מקצה אחד",
-      "חתוך לשניים והגש"
-    ],
-    tips: "הלאפה החמה קל יותר לגלגל ולא נקרעת",
-    popularity: 84
-  }
-];
+    <script type="text/babel">
+        const { useState } = React;
 
-const difficultyColors = {
-  "קל מאוד": "bg-green-100 text-green-800 border-green-200",
-  "קל": "bg-blue-100 text-blue-800 border-blue-200", 
-  "בינוני": "bg-yellow-100 text-yellow-800 border-yellow-200"
-};
+        // Simple icon components to replace lucide-react
+        const Clock = () => <span className="lucide-icon">⏰</span>;
+        const Users = () => <span className="lucide-icon">👥</span>;
+        const Flame = () => <span className="lucide-icon">🔥</span>;
+        const Star = () => <span className="lucide-icon">⭐</span>;
+        const ChefHat = () => <span className="lucide-icon">👨‍🍳</span>;
+        const Timer = () => <span className="lucide-icon">⏱️</span>;
+        const CheckCircle = () => <span className="lucide-icon">✅</span>;
 
-const MealCard = ({ meal, onSelect, isSelected }) => {
-  return (
-    <div 
-      className={`bg-white rounded-2xl p-6 border-2 cursor-pointer transition-all duration-300 hover:shadow-xl transform hover:scale-105 ${
-        isSelected ? 'border-orange-500 bg-orange-50' : 'border-gray-200'
-      }`}
-      onClick={() => onSelect(meal)}
-    >
-      <div className="flex justify-between items-start mb-4">
-        <div className="flex items-center gap-3">
-          <span className="text-3xl">{meal.emoji}</span>
-          <div>
-            <h3 className="text-lg font-bold text-gray-900">{meal.name}</h3>
-            <div className="flex items-center gap-2 mt-1">
-              <span className={`px-2 py-1 rounded-full text-xs border ${difficultyColors[meal.difficulty]}`}>
-                {meal.difficulty}
-              </span>
-              <div className="flex items-center gap-1 text-orange-600">
-                <Star className="w-4 h-4 fill-current" />
-                <span className="text-sm font-semibold">{meal.popularity}%</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div className="grid grid-cols-3 gap-3 mb-4">
-        <div className="text-center p-2 bg-blue-50 rounded-lg">
-          <Clock className="w-5 h-5 text-blue-600 mx-auto mb-1" />
-          <span className="text-sm font-semibold text-blue-800">{meal.time}</span>
-        </div>
-        <div className="text-center p-2 bg-red-50 rounded-lg">
-          <Flame className="w-5 h-5 text-red-600 mx-auto mb-1" />
-          <span className="text-sm font-semibold text-red-800">{meal.calories}</span>
-        </div>
-        <div className="text-center p-2 bg-green-50 rounded-lg">
-          <Users className="w-5 h-5 text-green-600 mx-auto mb-1" />
-          <span className="text-sm font-semibold text-green-800">{meal.servings} מנה</span>
-        </div>
-      </div>
-      
-      <div className="space-y-2">
-        <h4 className="font-semibold text-gray-800">מה צריך:</h4>
-        <div className="text-sm text-gray-600">
-          {meal.ingredients.slice(0, 3).join(", ")}
-          {meal.ingredients.length > 3 && ` ועוד ${meal.ingredients.length - 3}...`}
-        </div>
-      </div>
-    </div>
-  );
-};
+        const meals = [
+            {
+                id: 1,
+                name: "טוסט גבינה מושלם",
+                emoji: "🧈",
+                time: "5 דק'",
+                difficulty: "קל מאוד",
+                calories: "400",
+                servings: 1,
+                ingredients: ["2 פרוסות לחם טוסט", "גבינה צהובה", "עגבניה", "מיונז"],
+                steps: [
+                    "הכנס 2 פרוסות לחם לטוסטר",
+                    "בזמן הטוסט - חתוך עגבניה לפרוסות",
+                    "שים גבינה על הטוסט החם",
+                    "הוסף פרוסות עגבניה ומיונז",
+                    "חתוך באלכסון ותהנה!"
+                ],
+                tips: "הגבינה תמס יותר טוב אם הטוסט חם",
+                popularity: 95
+            },
+            {
+                id: 2,
+                name: "סקרמבל עם תוספות",
+                emoji: "🍳",
+                time: "7 דק'",
+                difficulty: "קל",
+                calories: "500",
+                servings: 1,
+                ingredients: ["3 ביצים", "גבינה צהובה מגוררת", "בצל ירוק קצוץ", "מעט שמן", "לחם"],
+                steps: [
+                    "שבור 3 ביצים לקערה וערבב",
+                    "חמם מעט שמן במחבת",
+                    "שפוך ביצים ובלבל ברציפות",
+                    "כשהביצים כמעט מוכנות - הוסף גבינה",
+                    "פזר בצל ירוק והגש עם לחם"
+                ],
+                tips: "ביצים מקושקשות צריכות להיות קרמיות, לא יבשות",
+                popularity: 88
+            },
+            {
+                id: 3,
+                name: "פסטה מהירה",
+                emoji: "🍝",
+                time: "12 דק'",
+                difficulty: "בינוני",
+                calories: "600",
+                servings: 1,
+                ingredients: ["100 גרם פסטה", "רטב עגבניות", "נקניקיות", "גבינה מגוררת", "מלח"],
+                steps: [
+                    "הרתח מים במקרמה עם מלח",
+                    "הוסף פסטה ובשל לפי ההוראות",
+                    "בינתיים - חתוך נקניקיות וחמם ברטב",
+                    "סנן פסטה ושמור מעט מי בישול",
+                    "ערבב פסטה + רטב + גבינה מגוררת"
+                ],
+                tips: "תמיד שמור קצת ממי הבישול - זה עוזר לערבב",
+                popularity: 92
+            },
+            {
+                id: 4,
+                name: "סלט טונה עשיר",
+                emoji: "🥗",
+                time: "5 דק'",
+                difficulty: "קל מאוד",
+                calories: "450",
+                servings: 1,
+                ingredients: ["פחית טונה", "ביצה קשה", "עגבניות", "מלפפון", "מיונז", "פיתה"],
+                steps: [
+                    "פתח פחית טונה וסנן",
+                    "חתוך ביצה קשה, עגבניות ומלפפון",
+                    "ערבב הכל בקערה עם מיונז",
+                    "חמם פיתה במיקרו 20 שניות",
+                    "אכל עם הפיתה או מלא לתוכה"
+                ],
+                tips: "ביצים קשות אפשר להכין בתחילת השבוע",
+                popularity: 85
+            },
+            {
+                id: 5,
+                name: "קסדיה מהירה",
+                emoji: "🌯",
+                time: "6 דק'",
+                difficulty: "קל",
+                calories: "520",
+                servings: 1,
+                ingredients: ["2 פיתות", "גבינה צהובה", "הודו פרוס", "עגבניה", "מעט שמן"],
+                steps: [
+                    "מרח מעט שמן על מחבת וחמם",
+                    "שים פיתה אחת במחבת",
+                    "פזר גבינה, הודו ועגבניה חתוכה",
+                    "כסה בפיתה שניה",
+                    "צלה 2-3 דקות מכל צד עד שזהב"
+                ],
+                tips: "לחץ קלות עם כף כדי שהגבינה תמס טוב",
+                popularity: 90
+            },
+            {
+                id: 6,
+                name: "תפוח אדמה ממולא",
+                emoji: "🥔",
+                time: "8 דק'",
+                difficulty: "קל",
+                calories: "400",
+                servings: 1,
+                ingredients: ["תפוח אדמה גדול", "גבינת קוטג'", "בצל ירוק", "גבינה צהובה", "מלח ופלפל"],
+                steps: [
+                    "חורר את התפוח אדמה בכל הצדדים",
+                    "מיקרו 6 דקות (הפוך באמצע)",
+                    "חתוך לאורך והוצא את הבשר",
+                    "ערבב בשר התפוח עם קוטג' ותיבול",
+                    "מלא בחזרה ופזר גבינה צהובה מעל"
+                ],
+                tips: "תפוח אדמה מוכן כשהוא רך לחיצה",
+                popularity: 78
+            },
+            {
+                id: 7,
+                name: "סנדוויץ' בגט עשיר",
+                emoji: "🥖",
+                time: "4 דק'",
+                difficulty: "קל מאוד",
+                calories: "550",
+                servings: 1,
+                ingredients: ["בגט קטן", "הודו פרוס", "גבינה צהובה", "עגבניה", "חסה", "מיונז"],
+                steps: [
+                    "חתוך בגט לאורך (אל תחתוך עד הסוף)",
+                    "מרח מיונז בשני הצדדים",
+                    "שכב הודו, גבינה, עגבניה וחסה",
+                    "לחץ קלות ועטוף בנייר",
+                    "אופציה: חמם בתנור דקה לגבינה מומסת"
+                ],
+                tips: "תמיד לחץ קלות כדי שהסנדוויץ' לא יתפרק",
+                popularity: 87
+            },
+            {
+                id: 8,
+                name: "אורז עם ביצה מטוגנת",
+                emoji: "🍚",
+                time: "8 דק'",
+                difficulty: "בינוני",
+                calories: "480",
+                servings: 1,
+                ingredients: ["כוס אורז מיידי", "ביצה", "נקניקיות", "בצל ירוק", "רטב סויה", "שמן"],
+                steps: [
+                    "הכן אורז מיידי לפי ההוראות",
+                    "חמם שמן במחבת וטגן ביצה",
+                    "באותה מחבת טגן נקניקיות חתוכות",
+                    "הגש אורז עם הביצה מעל",
+                    "פזר בצל ירוק וטפטף רטב סויה"
+                ],
+                tips: "ביצה עם חלמון רך הכי טעימה עם האורז",
+                popularity: 83
+            },
+            {
+                id: 9,
+                name: "שקשוקה מהירה",
+                emoji: "🍅",
+                time: "10 דק'",
+                difficulty: "בינוני",
+                calories: "420",
+                servings: 1,
+                ingredients: ["רטב עגבניות", "2 ביצים", "בצל קטן", "פלפל אדום", "גבינת צפת", "לחם"],
+                steps: [
+                    "חתוך בצל ופלפל לקוביות קטנות",
+                    "מטגן במחבת 3 דקות",
+                    "הוסף רטב עגבניות וחמם",
+                    "שבור ביצים לתוך הרטב",
+                    "בשל 5 דקות ופזר גבינת צפת מעל"
+                ],
+                tips: "אל תערבב את הביצים - תן להם להתבשל ברטב",
+                popularity: 89
+            },
+            {
+                id: 10,
+                name: "נאצ'וס ביתי",
+                emoji: "🧀",
+                time: "6 דק'",
+                difficulty: "קל",
+                calories: "480",
+                servings: 1,
+                ingredients: ["צ'יפס טורטילה", "גבינה צהובה מגוררת", "גואקמולה", "קטשופ", "בצל ירוק"],
+                steps: [
+                    "פזר צ'יפס על צלחת שטוחה",
+                    "פזר גבינה מגוררת מעל",
+                    "מיקרו 90 שניות עד שהגבינה נמסה",
+                    "הוסף גואקמולה וקטשופ",
+                    "פזר בצל ירוק ותהנה!"
+                ],
+                tips: "אל תמלא יותר מדי - הצ'יפס צריך להישאר פריך",
+                popularity: 86
+            },
+            {
+                id: 11,
+                name: "רולו הודו וגבינה",
+                emoji: "🌮",
+                time: "5 דק'",
+                difficulty: "קל מאוד",
+                calories: "440",
+                servings: 1,
+                ingredients: ["טורטילה גדולה", "הודו פרוס", "גבינה צהובה", "חסה", "עגבניה", "מיונז"],
+                steps: [
+                    "פרוש טורטילה על משטח עבודה",
+                    "מרח מיונז על כל השטח",
+                    "שכב הודו, גבינה, חסה ועגבניה",
+                    "גלגל חזק מהקצה הקרוב אליך",
+                    "חתוך לחצי וקבע עם קיסם"
+                ],
+                tips: "תמיד גלגל חזק בהתחלה כדי שלא יתפרק",
+                popularity: 82
+            },
+            {
+                id: 12,
+                name: "פנקייק מלוח מהיר",
+                emoji: "🥞",
+                time: "9 דק'",
+                difficulty: "בינוני",
+                calories: "460",
+                servings: 1,
+                ingredients: ["ביצה", "קמח", "חלב", "גבינה לבנה", "מלח", "בצל ירוק", "שמן"],
+                steps: [
+                    "ערבב ביצה + 3 כפות קמח + מעט חלב",
+                    "הוסף קמצוץ מלח ובצל ירוק קצוץ",
+                    "חמם שמן במחבת קטנה",
+                    "יצוק תערובת וטגן 3 דקות מכל צד",
+                    "הגש עם גבינה לבנה"
+                ],
+                tips: "הפנקייק מוכן כשהוא זהוב ופריך מבחוץ",
+                popularity: 75
+            },
+            {
+                id: 13,
+                name: "סנדוויץ' גריל",
+                emoji: "🥪",
+                time: "7 דק'",
+                difficulty: "קל",
+                calories: "520",
+                servings: 1,
+                ingredients: ["2 פרוסות לחם", "גבינה צהובה", "הודו", "עגבניה", "חמאה"],
+                steps: [
+                    "מרח חמאה על הצד החיצוני של הלחם",
+                    "שכב גבינה, הודו ועגבניה בפנים",
+                    "חמם מחבת וישים הסנדוויץ'",
+                    "לחץ עם כף וטגן 3 דקות מכל צד",
+                    "חתוך באלכסון והגש חם"
+                ],
+                tips: "החמאה בחוץ נותנת קריספיות מושלמת",
+                popularity: 91
+            },
+            {
+                id: 14,
+                name: "באו במקרמה",
+                emoji: "🍜",
+                time: "10 דק'",
+                difficulty: "בינוני",
+                calories: "380",
+                servings: 1,
+                ingredients: ["באו (נודלס רגיל)", "ביצה", "בצל ירוק", "גזר", "נקניקיות"],
+                steps: [
+                    "הרתח מים במקרמה קטנה",
+                    "הוסף את הבאו לפי ההוראות",
+                    "2 דקות לפני הסוף - הוסף גזר חתוך",
+                    "הוסף ביצה מקושקשת ונקניקיות",
+                    "הגש חם עם בצל ירוק מעל"
+                ],
+                tips: "הביצה תתקשה מהחום - אל תבשל יותר מדי",
+                popularity: 80
+            },
+            {
+                id: 15,
+                name: "פיצה אישית מפיתה",
+                emoji: "🍕",
+                time: "8 דק'",
+                difficulty: "קל",
+                calories: "490",
+                servings: 1,
+                ingredients: ["פיתה", "רטב עגבניות", "גבינה מוצרלה", "זיתים", "פלפלים"],
+                steps: [
+                    "מרח רטב עגבניות על הפיתה",
+                    "פזר גבינה מוצרלה מגוררת",
+                    "הוסף זיתים ופלפלים חתוכים",
+                    "תנור טוסטר 200 מעלות - 5-6 דקות",
+                    "הוצא כשהגבינה בועה וזהובה"
+                ],
+                tips: "תנור טוסטר עובד הכי טוב לפיצה אישית",
+                popularity: 93
+            },
+            {
+                id: 16,
+                name: "לאפה עם הודו וטחינה",
+                emoji: "🌯",
+                time: "6 דק'",
+                difficulty: "קל",
+                calories: "510",
+                servings: 1,
+                ingredients: ["לאפה או טורטילה", "הודו פרוס", "גבינה", "עגבניה", "חסה", "טחינה"],
+                steps: [
+                    "חמם לאפה במיקרו 20 שניות",
+                    "מרח טחינה על כל השטח",
+                    "שכב הודו, גבינה, עגבניה וחסה",
+                    "גלגל חזק מקצה אחד",
+                    "חתוך לשניים והגש"
+                ],
+                tips: "הלאפה החמה קל יותר לגלגל ולא נקרעת",
+                popularity: 84
+            }
+        ];
 
-const RecipeDetails = ({ meal, onBack }) => {
-  const [completedSteps, setCompletedSteps] = useState([]);
-  
-  const toggleStep = (index) => {
-    setCompletedSteps(prev => 
-      prev.includes(index) 
-        ? prev.filter(i => i !== index)
-        : [...prev, index]
-    );
-  };
+        const difficultyColors = {
+            "קל מאוד": "bg-green-100 text-green-800 border-green-200",
+            "קל": "bg-blue-100 text-blue-800 border-blue-200", 
+            "בינוני": "bg-yellow-100 text-yellow-800 border-yellow-200"
+        };
 
-  return (
-    <div className="bg-white rounded-2xl p-8 border border-gray-200">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-4">
-          <span className="text-4xl">{meal.emoji}</span>
-          <div>
-            <h2 className="text-3xl font-bold text-gray-900">{meal.name}</h2>
-            <div className="flex items-center gap-4 mt-2">
-              <span className={`px-3 py-1 rounded-full text-sm border ${difficultyColors[meal.difficulty]}`}>
-                {meal.difficulty}
-              </span>
-              <div className="flex items-center gap-2">
-                <Clock className="w-5 h-5 text-orange-600" />
-                <span className="font-semibold">{meal.time}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Flame className="w-5 h-5 text-red-600" />
-                <span className="font-semibold">{meal.calories} קלוריות</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <button 
-          onClick={onBack}
-          className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
-        >
-          חזרה
-        </button>
-      </div>
+        function MealCard({ meal, onSelect, isSelected }) {
+            return (
+                <div 
+                    className={`bg-white rounded-2xl p-6 border-2 cursor-pointer transition-all duration-300 hover:shadow-xl transform hover:scale-105 ${
+                        isSelected ? 'border-orange-500 bg-orange-50' : 'border-gray-200'
+                    }`}
+                    onClick={() => onSelect(meal)}
+                >
+                    <div className="flex justify-between items-start mb-4">
+                        <div className="flex items-center gap-3">
+                            <span className="text-3xl">{meal.emoji}</span>
+                            <div>
+                                <h3 className="text-lg font-bold text-gray-900">{meal.name}</h3>
+                                <div className="flex items-center gap-2 mt-1">
+                                    <span className={`px-2 py-1 rounded-full text-xs border ${difficultyColors[meal.difficulty]}`}>
+                                        {meal.difficulty}
+                                    </span>
+                                    <div className="flex items-center gap-1 text-orange-600">
+                                        <Star />
+                                        <span className="text-sm font-semibold">{meal.popularity}%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-3 gap-3 mb-4">
+                        <div className="text-center p-2 bg-blue-50 rounded-lg">
+                            <Clock />
+                            <span className="text-sm font-semibold text-blue-800 block">{meal.time}</span>
+                        </div>
+                        <div className="text-center p-2 bg-red-50 rounded-lg">
+                            <Flame />
+                            <span className="text-sm font-semibold text-red-800 block">{meal.calories}</span>
+                        </div>
+                        <div className="text-center p-2 bg-green-50 rounded-lg">
+                            <Users />
+                            <span className="text-sm font-semibold text-green-800 block">{meal.servings} מנה</span>
+                        </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                        <h4 className="font-semibold text-gray-800">מה צריך:</h4>
+                        <div className="text-sm text-gray-600">
+                            {meal.ingredients.slice(0, 3).join(", ")}
+                            {meal.ingredients.length > 3 && ` ועוד ${meal.ingredients.length - 3}...`}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
 
-      <div className="grid lg:grid-cols-2 gap-8">
-        <div>
-          <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-            <ChefHat className="w-5 h-5 text-orange-600" />
-            מה צריך:
-          </h3>
-          <ul className="space-y-2">
-            {meal.ingredients.map((ingredient, index) => (
-              <li key={index} className="flex items-center gap-3 p-3 bg-orange-50 rounded-lg">
-                <CheckCircle className="w-5 h-5 text-orange-600" />
-                <span className="text-gray-800">{ingredient}</span>
-              </li>
-            ))}
-          </ul>
-          
-          {meal.tips && (
-            <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-              <h4 className="font-semibold text-yellow-800 mb-2">💡 טיפ חשוב:</h4>
-              <p className="text-yellow-700">{meal.tips}</p>
-            </div>
-          )}
-        </div>
+        function RecipeDetails({ meal, onBack }) {
+            const [completedSteps, setCompletedSteps] = useState([]);
+            
+            const toggleStep = (index) => {
+                setCompletedSteps(prev => 
+                    prev.includes(index) 
+                        ? prev.filter(i => i !== index)
+                        : [...prev, index]
+                );
+            };
 
-        <div>
-          <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-            <Timer className="w-5 h-5 text-green-600" />
-            איך להכין:
-          </h3>
-          <ol className="space-y-3">
-            {meal.steps.map((step, index) => (
-              <li 
-                key={index} 
-                className={`flex items-start gap-4 p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                  completedSteps.includes(index) 
-                    ? 'bg-green-50 border-green-300' 
-                    : 'bg-gray-50 border-gray-200 hover:border-green-300'
-                }`}
-                onClick={() => toggleStep(index)}
-              >
-                <span className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
-                  completedSteps.includes(index)
-                    ? 'bg-green-500 text-white'
-                    : 'bg-orange-500 text-white'
-                }`}>
-                  {completedSteps.includes(index) ? '✓' : index + 1}
-                </span>
-                <span className={`text-gray-800 ${completedSteps.includes(index) ? 'line-through opacity-75' : ''}`}>
-                  {step}
-                </span>
-              </li>
-            ))}
-          </ol>
-          
-          <div className="mt-6 p-4 bg-gradient-to-r from-orange-100 to-green-100 rounded-lg text-center">
-            <h4 className="font-bold text-gray-800 mb-2">🎉 בתיאבון!</h4>
-            <p className="text-gray-700">סימן השלבים שסיימת בלחיצה עליהם</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
+            return (
+                <div className="bg-white rounded-2xl p-8 border border-gray-200">
+                    <div className="flex items-center justify-between mb-6">
+                        <div className="flex items-center gap-4">
+                            <span className="text-4xl">{meal.emoji}</span>
+                            <div>
+                                <h2 className="text-3xl font-bold text-gray-900">{meal.name}</h2>
+                                <div className="flex items-center gap-4 mt-2">
+                                    <span className={`px-3 py-1 rounded-full text-sm border ${difficultyColors[meal.difficulty]}`}>
+                                        {meal.difficulty}
+                                    </span>
+                                    <div className="flex items-center gap-2">
+                                        <Clock />
+                                        <span className="font-semibold">{meal.time}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Flame />
+                                        <span className="font-semibold">{meal.calories} קלוריות</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button 
+                            onClick={onBack}
+                            className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
+                        >
+                            חזרה
+                        </button>
+                    </div>
 
-export default function TeenNightMealsBoard() {
-  const [selectedMeal, setSelectedMeal] = useState(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [difficultyFilter, setDifficultyFilter] = useState("all");
+                    <div className="grid lg:grid-cols-2 gap-8">
+                        <div>
+                            <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                <ChefHat />
+                                מה צריך:
+                            </h3>
+                            <ul className="space-y-2">
+                                {meal.ingredients.map((ingredient, index) => (
+                                    <li key={index} className="flex items-center gap-3 p-3 bg-orange-50 rounded-lg">
+                                        <CheckCircle />
+                                        <span className="text-gray-800">{ingredient}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                            
+                            {meal.tips && (
+                                <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                    <h4 className="font-semibold text-yellow-800 mb-2">💡 טיפ חשוב:</h4>
+                                    <p className="text-yellow-700">{meal.tips}</p>
+                                </div>
+                            )}
+                        </div>
 
-  const filteredMeals = meals.filter(meal => {
-    const matchesSearch = meal.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesDifficulty = difficultyFilter === "all" || meal.difficulty === difficultyFilter;
-    return matchesSearch && matchesDifficulty;
-  });
+                        <div>
+                            <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                <Timer />
+                                איך להכין:
+                            </h3>
+                            <ol className="space-y-3">
+                                {meal.steps.map((step, index) => (
+                                    <li 
+                                        key={index} 
+                                        className={`flex items-start gap-4 p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                                            completedSteps.includes(index) 
+                                                ? 'bg-green-50 border-green-300' 
+                                                : 'bg-gray-50 border-gray-200 hover:border-green-300'
+                                        }`}
+                                        onClick={() => toggleStep(index)}
+                                    >
+                                        <span className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
+                                            completedSteps.includes(index)
+                                                ? 'bg-green-500 text-white'
+                                                : 'bg-orange-500 text-white'
+                                        }`}>
+                                            {completedSteps.includes(index) ? '✓' : index + 1}
+                                        </span>
+                                        <span className={`text-gray-800 ${completedSteps.includes(index) ? 'line-through opacity-75' : ''}`}>
+                                            {step}
+                                        </span>
+                                    </li>
+                                ))}
+                            </ol>
+                            
+                            <div className="mt-6 p-4 bg-gradient-to-r from-orange-100 to-green-100 rounded-lg text-center">
+                                <h4 className="font-bold text-gray-800 mb-2">🎉 בתיאבון!</h4>
+                                <p className="text-gray-700">סימן השלבים שסיימת בלחיצה עליהם</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
 
-  if (selectedMeal) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-green-50 p-6" dir="rtl">
-        <RecipeDetails meal={selectedMeal} onBack={() => setSelectedMeal(null)} />
-      </div>
-    );
-  }
+        function TeenNightMealsBoard() {
+            const [selectedMeal, setSelectedMeal] = useState(null);
+            const [searchTerm, setSearchTerm] = useState("");
+            const [difficultyFilter, setDifficultyFilter] = useState("all");
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-green-50 p-6" dir="rtl">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-5xl font-bold text-gray-900 mb-4 flex items-center justify-center gap-4">
-            <span className="text-6xl">🍕</span>
-            לוח ארוחות הלילה שלנו
-            <span className="text-6xl">🌙</span>
-          </h1>
-          <p className="text-xl text-gray-600 mb-2">
-            16 ארוחות מזינות ומהירות לילדים הרעבים שלנו
-          </p>
-          <p className="text-lg text-orange-600 font-semibold">
-            💡 לחץ על ארוחה כדי לראות הוראות מפורטות
-          </p>
-        </div>
+            const filteredMeals = meals.filter(meal => {
+                const matchesSearch = meal.name.toLowerCase().includes(searchTerm.toLowerCase());
+                const matchesDifficulty = difficultyFilter === "all" || meal.difficulty === difficultyFilter;
+                return matchesSearch && matchesDifficulty;
+            });
 
-        {/* Filters */}
-        <div className="flex flex-col md:flex-row gap-4 mb-8 max-w-2xl mx-auto">
-          <input
-            type="text"
-            placeholder="חפש ארוחה..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="flex-1 px-4 py-3 rounded-xl border border-orange-200 focus:outline-none focus:ring-2 focus:ring-orange-500"
-          />
-          <select
-            value={difficultyFilter}
-            onChange={(e) => setDifficultyFilter(e.target.value)}
-            className="px-4 py-3 rounded-xl border border-orange-200 focus:outline-none focus:ring-2 focus:ring-orange-500"
-          >
-            <option value="all">כל רמות הקושי</option>
-            <option value="קל מאוד">קל מאוד</option>
-            <option value="קל">קל</option>
-            <option value="בינוני">בינוני</option>
-          </select>
-        </div>
+            if (selectedMeal) {
+                return (
+                    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-green-50 p-6">
+                        <RecipeDetails meal={selectedMeal} onBack={() => setSelectedMeal(null)} />
+                    </div>
+                );
+            }
 
-        {/* Quick Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 max-w-4xl mx-auto">
-          <div className="bg-white rounded-xl p-4 text-center border border-orange-200">
-            <div className="text-2xl font-bold text-orange-600">16</div>
-            <div className="text-sm text-gray-600">ארוחות</div>
-          </div>
-          <div className="bg-white rounded-xl p-4 text-center border border-green-200">
-            <div className="text-2xl font-bold text-green-600">4-12</div>
-            <div className="text-sm text-gray-600">דקות</div>
-          </div>
-          <div className="bg-white rounded-xl p-4 text-center border border-blue-200">
-            <div className="text-2xl font-bold text-blue-600">380-600</div>
-            <div className="text-sm text-gray-600">קלוריות</div>
-          </div>
-          <div className="bg-white rounded-xl p-4 text-center border border-purple-200">
-            <div className="text-2xl font-bold text-purple-600">100%</div>
-            <div className="text-sm text-gray-600">טעים</div>
-          </div>
-        </div>
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-orange-50 to-green-50 p-6">
+                    <div className="max-w-7xl mx-auto">
+                        {/* Header */}
+                        <div className="text-center mb-8">
+                            <h1 className="text-5xl font-bold text-gray-900 mb-4 flex items-center justify-center gap-4">
+                                <span className="text-6xl">🍕</span>
+                                לוח ארוחות הלילה שלנו
+                                <span className="text-6xl">🌙</span>
+                            </h1>
+                            <p className="text-xl text-gray-600 mb-2">
+                                16 ארוחות מזינות ומהירות לילדים הרעבים שלנו
+                            </p>
+                            <p className="text-lg text-orange-600 font-semibold">
+                                💡 לחץ על ארוחה כדי לראות הוראות מפורטות
+                            </p>
+                        </div>
 
-        {/* Meals Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredMeals.map((meal) => (
-            <MealCard 
-              key={meal.id} 
-              meal={meal} 
-              onSelect={setSelectedMeal}
-              isSelected={selectedMeal?.id === meal.id}
-            />
-          ))}
-        </div>
+                        {/* Filters */}
+                        <div className="flex flex-col md:flex-row gap-4 mb-8 max-w-2xl mx-auto">
+                            <input
+                                type="text"
+                                placeholder="חפש ארוחה..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="flex-1 px-4 py-3 rounded-xl border border-orange-200 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            />
+                            <select
+                                value={difficultyFilter}
+                                onChange={(e) => setDifficultyFilter(e.target.value)}
+                                className="px-4 py-3 rounded-xl border border-orange-200 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            >
+                                <option value="all">כל רמות הקושי</option>
+                                <option value="קל מאוד">קל מאוד</option>
+                                <option value="קל">קל</option>
+                                <option value="בינוני">בינוני</option>
+                            </select>
+                        </div>
 
-        {filteredMeals.length === 0 && (
-          <div className="text-center py-12">
-            <div className="text-6xl mb-4">🤔</div>
-            <h3 className="text-2xl font-bold text-gray-600 mb-2">לא נמצא כלום</h3>
-            <p className="text-gray-500">נסה לשנות את החיפוש או הפילטר</p>
-          </div>
-        )}
+                        {/* Quick Stats */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 max-w-4xl mx-auto">
+                            <div className="bg-white rounded-xl p-4 text-center border border-orange-200">
+                                <div className="text-2xl font-bold text-orange-600">16</div>
+                                <div className="text-sm text-gray-600">ארוחות</div>
+                            </div>
+                            <div className="bg-white rounded-xl p-4 text-center border border-green-200">
+                                <div className="text-2xl font-bold text-green-600">4-12</div>
+                                <div className="text-sm text-gray-600">דקות</div>
+                            </div>
+                            <div className="bg-white rounded-xl p-4 text-center border border-blue-200">
+                                <div className="text-2xl font-bold text-blue-600">380-600</div>
+                                <div className="text-sm text-gray-600">קלוריות</div>
+                            </div>
+                            <div className="bg-white rounded-xl p-4 text-center border border-purple-200">
+                                <div className="text-2xl font-bold text-purple-600">100%</div>
+                                <div className="text-sm text-gray-600">טעים</div>
+                            </div>
+                        </div>
 
-        {/* Footer */}
-        <div className="mt-12 text-center">
-          <div className="bg-white rounded-2xl p-6 border border-orange-200 max-w-2xl mx-auto">
-            <h3 className="text-xl font-bold text-gray-900 mb-3">🎯 כללי הזהב</h3>
-            <div className="grid md:grid-cols-2 gap-4 text-sm text-gray-700">
-              <div>• תמיד יש ביצים במקרר</div>
-              <div>• רטבים הופכים הכל לטעים</div>
-              <div>• גבינה צהובה = חלבון + טעם</div>
-              <div>• ירקות חתוכים = קל יותר</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+                        {/* Meals Grid */}
+                        <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                            {filteredMeals.map((meal) => (
+                                <MealCard 
+                                    key={meal.id} 
+                                    meal={meal} 
+                                    onSelect={setSelectedMeal}
+                                    isSelected={selectedMeal?.id === meal.id}
+                                />
+                            ))}
+                        </div>
+
+                        {filteredMeals.length === 0 && (
+                            <div className="text-center py-12">
+                                <div className="text-6xl mb-4">🤔</div>
+                                <h3 className="text-2xl font-bold text-gray-600 mb-2">לא נמצא כלום</h3>
+                                <p className="text-gray-500">נסה לשנות את החיפוש או הפילטר</p>
+                            </div>
+                        )}
+
+                        {/* Footer */}
+                        <div className="mt-12 text-center">
+                            <div className="bg-white rounded-2xl p-6 border border-orange-200 max-w-2xl mx-auto">
+                                <h3 className="text-xl font-bold text-gray-900 mb-3">🎯 כללי הזהב</h3>
+                                <div className="grid md:grid-cols-2 gap-4 text-sm text-gray-700">
+                                    <div>• תמיד יש ביצים במקרר</div>
+                                    <div>• רטבים הופכים הכל לטעים</div>
+                                    <div>• גבינה צהובה = חלבון + טעם</div>
+                                    <div>• ירקות חתוכים = קל יותר</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Render the app
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<TeenNightMealsBoard />);
+    </script>
+</body>
+</html>
